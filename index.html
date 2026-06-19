@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surat Spesial Buat Kak Archi</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #fce4ec;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+        }
+        .envelope {
+            width: 200px;
+            height: 140px;
+            background-color: #f48fb1;
+            position: relative;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-top: 80px solid #f06292;
+            transform-origin: top;
+            transition: transform 0.5s 0.3s;
+            z-index: 3;
+        }
+        .letter {
+            width: 180px;
+            height: 120px;
+            background-color: #ffffff
+            
