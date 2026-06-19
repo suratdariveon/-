@@ -1,48 +1,467 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surat Spesial Buat Kak Archi</title>
-    <style>
-        body {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #fce4ec;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-        .container {
-            text-align: center;
-            position: relative;
-            cursor: pointer;
-        }
-        .envelope {
-            width: 200px;
-            height: 140px;
-            background-color: #f48fb1;
-            position: relative;
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .envelope::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            border-left: 100px solid transparent;
-            border-right: 100px solid transparent;
-            border-top: 80px solid #f06292;
-            transform-origin: top;
-            transition: transform 0.5s 0.3s;
-            z-index: 3;
-        }
-        .letter {
-            width: 180px;
-            height: 120px;
-            background-color: #ffffff
-            
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Untuk Kak Archi</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --page-1:#eef6fb;
+    --page-2:#dcedf9;
+    --stage-blue:#cfe9fb;
+    --blue-1:#7db8e8;
+    --blue-2:#4a86c4;
+    --blue-3:#2c5a8a;
+    --blue-deep:#1f4468;
+    --white:#ffffff;
+    --ink-on-blue:#ffffff;
+    --ink-soft:#eaf4ff;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    min-height:100%;
+    background:linear-gradient(165deg, var(--page-1), var(--page-2));
+    color:var(--blue-deep);
+    font-family:'Plus Jakarta Sans', sans-serif;
+    overflow-x:hidden;
+  }
+
+  button{ font-family:inherit; }
+
+  :focus-visible{
+    outline:2px solid var(--blue-3);
+    outline-offset:3px;
+  }
+
+  /* ---------- background character slots (kamu isi sendiri) ---------- */
+  .bg-character{
+    position:fixed;
+    bottom:-8px;
+    width:clamp(130px, 34vw, 260px);
+    z-index:0;
+    pointer-events:none;
+  }
+  .bg-character.left{ left:-8px; }
+  .bg-character.right{ right:-8px; }
+  .bg-character img{
+    width:100%;
+    display:block;
+    filter:drop-shadow(0 14px 20px rgba(44,90,138,0.25));
+  }
+
+  /* ---------- scenes ---------- */
+  .scene{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+  }
+
+  .scene-letter{
+    display:none;
+    min-height:auto;
+    padding:60px 20px 80px;
+  }
+
+  body.is-open .scene-envelope{ display:none; }
+  body.is-open .scene-letter{ display:flex; }
+
+  /* ---------- stage (kotak biru muda tempat amplop mendarat) ---------- */
+  .stage{
+    background:var(--stage-blue);
+    border-radius:28px;
+    padding:clamp(34px,7vw,52px) clamp(28px,6vw,44px) clamp(46px,8vw,64px);
+    box-shadow:0 24px 50px rgba(44,90,138,0.22);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+  }
+
+  /* ---------- envelope ---------- */
+  .envelope{
+    position:relative;
+    width:min(80vw, calc(280px + 1cm));
+    height:min(58vw, calc(196px + 0.7cm));
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    perspective:800px;
+    animation:flyIn 1.6s cubic-bezier(.22,.68,.18,1) both;
+  }
+
+  @keyframes flyIn{
+    0%   { transform:translate(55vw,-50vh) rotate(20deg) scale(0.85); opacity:0; }
+    18%  { transform:translate(22vw,-32vh) rotate(-12deg) scale(0.9); opacity:1; }
+    36%  { transform:translate(-12vw,-18vh) rotate(10deg) scale(0.95); opacity:1; }
+    54%  { transform:translate(9vw,-7vh) rotate(-8deg) scale(0.98); opacity:1; }
+    72%  { transform:translate(-5vw,1vh) rotate(5deg) scale(1); opacity:1; }
+    88%  { transform:translate(2vw,9px) rotate(-2deg) scale(1); opacity:1; }
+    100% { transform:translate(0,16px) rotate(0deg) scale(1); opacity:1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .envelope{ animation:none; opacity:1; }
+  }
+
+  .envelope-back{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(160deg, var(--blue-1), var(--blue-2));
+    border-radius:6px;
+    box-shadow:0 18px 40px rgba(31,68,104,0.35);
+  }
+
+  .envelope-pocket{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:82%;
+    background:linear-gradient(180deg, var(--blue-2), var(--blue-deep));
+    border-radius:0 0 6px 6px;
+    clip-path:polygon(0 0, 50% 20%, 100% 0, 100% 100%, 0 100%);
+    z-index:2;
+  }
+
+  .pocket-line{
+    position:absolute;
+    left:10%; right:10%;
+    height:3px;
+    background:var(--white);
+    opacity:0.85;
+    border-radius:2px;
+  }
+  .pocket-line.one{ bottom:34%; }
+  .pocket-line.two{ bottom:28%; }
+
+  .envelope-label{
+    position:absolute;
+    left:6%; right:6%;
+    bottom:8%;
+    text-align:center;
+    font-family:'Caveat', cursive;
+    font-size:clamp(13px,2.6vw,16px);
+    color:var(--white);
+    text-shadow:0 1px 2px rgba(0,0,0,0.25);
+    z-index:4;
+  }
+
+  .envelope-letter-peek{
+    position:absolute;
+    left:10%; right:10%;
+    bottom:8%;
+    height:55%;
+    background:linear-gradient(165deg, var(--blue-1), var(--blue-2));
+    border-radius:3px;
+    box-shadow:0 -2px 8px rgba(0,0,0,0.15);
+    z-index:1;
+    transition:transform 0.7s cubic-bezier(.6,.05,.25,1) 0.5s, opacity 0.5s ease 0.9s;
+    overflow:hidden;
+  }
+
+  .peek-line{
+    position:absolute;
+    left:14%; right:14%;
+    height:2px;
+    background:var(--white);
+    opacity:0.8;
+  }
+  .peek-line.one{ top:30%; }
+  .peek-line.two{ top:38%; }
+
+  .envelope-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:62%;
+    background:linear-gradient(160deg, var(--blue-1), var(--blue-2));
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    transform-origin:top center;
+    transform:rotateX(0deg);
+    transition:transform 0.7s cubic-bezier(.6,.05,.25,1);
+    z-index:3;
+    box-shadow:0 6px 14px rgba(31,68,104,0.25);
+  }
+
+  .seal{
+    position:absolute;
+    top:40%; left:50%;
+    transform:translate(-50%,-50%) scale(1);
+    width:42px; height:42px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, #ffd6e3 70%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.25);
+    z-index:4;
+    transition:transform 0.35s ease, opacity 0.35s ease;
+  }
+
+  .envelope.cracking .seal{
+    transform:translate(-50%,-50%) scale(1.3) rotate(8deg);
+  }
+
+  .envelope.open .seal{
+    transform:translate(-50%,-50%) scale(0.4) rotate(25deg);
+    opacity:0;
+  }
+
+  .envelope.open .envelope-flap{
+    transform:rotateX(-170deg);
+  }
+
+  .envelope.open .envelope-letter-peek{
+    transform:translateY(-240%);
+    opacity:0;
+  }
+
+  .hint{
+    margin:18px 0 0;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--blue-3);
+    text-align:center;
+  }
+
+  /* ---------- letter ---------- */
+  .letter-paper{
+    position:relative;
+    width:min(92vw, calc(600px + 1cm));
+    background:linear-gradient(170deg, var(--blue-1), var(--blue-3));
+    color:var(--ink-on-blue);
+    border-radius:10px;
+    padding:clamp(54px, 9vw, 76px) clamp(30px,6vw,48px) clamp(46px,8vw,60px);
+    box-shadow:0 30px 60px rgba(31,68,104,0.35);
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  body.is-open .letter-paper{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .letter-paper::before,
+  .letter-paper::after{
+    content:"";
+    position:absolute;
+    left:clamp(20px,5vw,32px);
+    right:clamp(20px,5vw,32px);
+    height:3px;
+    background:var(--white);
+    opacity:0.85;
+    border-radius:2px;
+  }
+  .letter-paper::before{ top:22px; }
+  .letter-paper::after{ top:30px; }
+
+  .letter-heading{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size:clamp(30px, 5.6vw, 42px);
+    margin:0 0 16px;
+    color:var(--white);
+  }
+
+  .letter-body p{
+    font-family:'Caveat', cursive;
+    font-size:clamp(19px, 3.2vw, 23px);
+    line-height:1.55;
+    margin:0 0 14px;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .letter-body p.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .letter-body::after{
+    content:"";
+    display:block;
+    clear:both;
+  }
+
+  /* ---------- foto yang menyatu di alur teks ---------- */
+  .flow-photo{
+    background:var(--white);
+    padding:5px;
+    border-radius:5px;
+    box-shadow:0 10px 18px rgba(0,0,0,0.28);
+    aspect-ratio:1;
+  }
+
+  .flow-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    border-radius:2px;
+    background:#dde7f0;
+  }
+
+  .flow-photo.fit-contain img{
+    object-fit:contain;
+    object-position:center;
+  }
+
+  .photo-placeholder-mini{
+    width:100%;
+    height:100%;
+    border-radius:2px;
+    background:repeating-linear-gradient(45deg, #dceaf6, #dceaf6 6px, #eef6fc 6px, #eef6fc 12px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:9px;
+    color:#5b7c9c;
+    text-align:center;
+    padding:4px;
+    line-height:1.2;
+  }
+
+  .flow-photo.size-sm{ width:clamp(72px, 22vw, 100px); }
+  .flow-photo.size-md{ width:clamp(94px, 28vw, 132px); }
+  .flow-photo.size-lg{ width:clamp(150px, 46vw, 220px); }
+  .flow-photo.size-portrait{
+    width:clamp(130px, 38vw, 190px);
+    aspect-ratio:3/4;
+  }
+  .flow-photo.size-portrait img{
+    height:100%;
+  }
+
+  .flow-photo.float-left{ float:left; margin:2px 16px 12px 0; }
+  .flow-photo.float-right{ float:right; margin:2px 0 12px 16px; }
+  .flow-photo.center-block{
+    float:none;
+    clear:both;
+    display:block;
+    margin:18px auto 6px;
+  }
+
+  .flow-photo.tilt-a{ transform:rotate(-6deg); }
+  .flow-photo.tilt-b{ transform:rotate(6deg); }
+  .flow-photo.tilt-c{ transform:rotate(-3deg); }
+  .flow-photo.tilt-d{ transform:rotate(4deg); }
+</style>
+</head>
+<body>
+
+  <div class="bg-character left" id="bgLeft"></div>
+  <div class="bg-character right" id="bgRight"></div>
+
+  <main class="scene scene-envelope">
+    <div class="stage">
+      <button class="envelope" id="envelopeBtn" aria-label="Ketuk untuk membuka surat">
+        <div class="envelope-back"></div>
+        <div class="envelope-letter-peek">
+          <div class="peek-line one"></div>
+          <div class="peek-line two"></div>
+        </div>
+        <div class="envelope-pocket">
+          <div class="pocket-line one"></div>
+          <div class="pocket-line two"></div>
+        </div>
+        <div class="envelope-flap"></div>
+        <p class="envelope-label" id="envelopeLabel"></p>
+        <div class="seal">♡</div>
+      </button>
+    </div>
+    <p class="hint">teken suratnya kak</p>
+  </main>
+
+  <section class="scene scene-letter" aria-hidden="true">
+    <div class="letter-paper">
+      <div class="letter-body" id="letterBody"></div>
+    </div>
+  </section>
+
+  <audio id="bgm" loop></audio>
+
+<script>
+  /* ====================== EDIT DI SINI ====================== */
+  const CONFIG = {
+    recipientName: "Archi",
+    senderLabel: "Dari adek kak archii💖",
+    message: [
+      "Haloo kak archii aku kirim ni surat karna ada 2 hal yaitu minta maaf dan klarifikasi kwkwkwkw",
+      "Aku minta maaf karna manggil kamu jester bukan kak archi kek biasa",
+      "Dan aku mau klarifikasi semua yg aku lakuin yg marah lah ngatain itu sebenarnya cuma \"acting\" iya acting aku cuma mau uji katanya aku udah di anggap kek adek kandung yaudah dari dulu aku nyari waktu yg pas hehehehe jadi maafin yah🙏",
+      "Btw selamat kak dapat juara delapan aku bangga banget kak dan selamat ya kak udah pindah rumah, jadi mau maafin dan masih anggep aku adek mu?"
+    ],
+    photos: [
+      "data:image/jpeg;base64,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 Waterman"
+    ],
+    bgLeft: "kiri.jpg",
+    bgRight: "kanan.jpg",
+    music: "music.mp3"
+  };
+
+  // Logika interaksi Amplop (Buka & Putar Musik)
+  const envelopeBtn = document.getElementById('envelopeBtn');
+  const bgm = document.getElementById('bgm');
+  
+  if(CONFIG.music) {
+    bgm.src = "music.mp3";
+  }
+
+  envelopeBtn.addEventListener('click', () => {
+    envelopeBtn.classList.add('cracking');
+    
+    setTimeout(() => {
+      envelopeBtn.classList.remove('cracking');
+      envelopeBtn.classList.add('open');
+      
+      if(CONFIG.music) {
+        bgm.play().catch(() => {
+          console.log("Musik diblokir browser otomatis. Membutuhkan interaksi penuh.");
+        }); 
+      }
+      
+      setTimeout(() => {
+        document.body.classList.add('is-open');
+        showLetterLines();
+      }, 1000);
+      
+    }, 400);
+  });
+
+  function showLetterLines() {
+    const letterBody = document.getElementById('letterBody');
+    letterBody.innerHTML = `<h2 class="letter-heading">Untuk Kak ${CONFIG.recipientName},</h2>`;
+    
+    CONFIG.message.forEach((text, index) => {
+      const p = document.createElement('p');
+      p.innerHTML = text;
+      letterBody.appendChild(p);
+      
+      setTimeout(() => {
+        p.classList.add('show');
+      }, index * 800 + 400);
+    });
+    
+    document.getElementById('envelopeLabel').innerText = CONFIG.senderLabel;
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('envelopeLabel').innerText = CONFIG.senderLabel;
+  });
+</script>
+</body>
+</html>
