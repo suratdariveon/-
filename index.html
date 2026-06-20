@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Untuk Kak Archi</title>
+
+<!--
+  ====================== CARA EDIT (BACA INI DULU) ======================
+  Cari kata "CONFIG" di bagian <script> paling bawah file ini.
+
+    const CONFIG = {
+      recipientName: "Archi",
+      senderLabel: "Dari adek kak archii💖",
+      message: [
+      "Haloo kak archii aku kirim ni surat karna ada 2 hal yaitu minta maaf dan klarifikasi kwkwkwkw",
+      "Aku minta maaf karna manggil kamu jester bukan kak archi kek biasa",
+      "Dan aku mau klarifikasi semua yg aku lakuin yg marah lah ngatain itu sebenarnya cuma \"acting\" iya acting aku cuma mau uji katanya aku udah di anggap kek adek kandung yaudah dari dulu aku nyari waktu yg pas hehehehe jadi maafin yah🙏",
+      "Btw selamat kak dapat juara delapan aku bangga banget kak dan selamat ya kak udah pindah rumah, jadi mau maafin dan masih anggep aku adek mu?"
+    ],
+      photos: ["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg"],
+      bgLeft: "kiri.jpg",
+      bgRight: "kanan.jpg",
+      music: "musik.mp3"
+    };
+
+  - recipientName  -> nama kakakmu (dipakai di "Untuk Kak ___,")
+  - senderLabel     -> tulisan yang nempel di amplop sebelum dibuka
+  - message         -> tiap baris di dalam [ ] jadi satu paragraf
+  - photos          -> SUDAH diisi langsung dengan 4 foto yang kamu
+                       kirim (ditempel langsung di dalam file ini,
+                       jadi gak perlu file foto terpisah lagi). Kalau
+                       mau ganti foto, kirim foto barunya ke Claude
+                       lagi biar ditempelin ulang.
+  - bgLeft/bgRight  -> gambar dekorasi (misal Haimiya Mio kamu) yang
+                       muncul di kiri-bawah & kanan-bawah halaman.
+                       Taruh file gambarnya di folder yang sama.
+  - music           -> file musik (mp3) di folder yang sama. Musik
+                       otomatis dicoba diputar begitu halaman dibuka.
+                       Kosongkan jadi "" kalau gak mau pakai musik.
+
+  Kalau file gambar/musik belum ada, bagian itu otomatis disembunyikan
+  atau dikasih placeholder, jadi halaman tetap rapi.
+  ========================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --page-1:#eef6fb;
+    --page-2:#dcedf9;
+    --stage-blue:#cfe9fb;
+    --blue-1:#7db8e8;
+    --blue-2:#4a86c4;
+    --blue-3:#2c5a8a;
+    --blue-deep:#1f4468;
+    --white:#ffffff;
+    --ink-on-blue:#ffffff;
+    --ink-soft:#eaf4ff;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    min-height:100%;
+    background:linear-gradient(165deg, var(--page-1), var(--page-2));
+    color:var(--blue-deep);
+    font-family:'Poppins', sans-serif;
+    overflow-x:hidden;
+  }
+
+  button{ font-family:inherit; }
+
+  :focus-visible{
+    outline:2px solid var(--blue-3);
+    outline-offset:3px;
+  }
+
+  /* ---------- background character slots (kamu isi sendiri) ---------- */
+  .bg-character{
+    position:fixed;
+    bottom:-8px;
+    width:clamp(130px, 34vw, 260px);
+    z-index:0;
+    pointer-events:none;
+  }
+  .bg-character.left{ left:-8px; }
+  .bg-character.right{ right:-8px; }
+  .bg-character img{
+    width:100%;
+    display:block;
+    filter:drop-shadow(0 14px 20px rgba(44,90,138,0.25));
+  }
+
+  /* ---------- scenes ---------- */
+  .scene{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+  }
+
+  .scene-letter{
+    display:none;
+    min-height:auto;
+    padding:60px 20px 80px;
+  }
+
+  body.is-open .scene-envelope{ display:none; }
+  body.is-open .scene-letter{ display:flex; }
+
+  /* ---------- stage (kotak biru muda tempat amplop mendarat) ---------- */
+  .stage{
+    background:var(--stage-blue);
+    border-radius:28px;
+    padding:clamp(34px,7vw,52px) clamp(28px,6vw,44px) clamp(46px,8vw,64px);
+    box-shadow:0 24px 50px rgba(44,90,138,0.22);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+  }
+
+  /* ---------- envelope ---------- */
+  .envelope{
+    position:relative;
+    width:min(80vw, calc(280px + 1cm));
+    height:min(58vw, calc(196px + 0.7cm));
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    perspective:800px;
+    animation:flyIn 1.6s cubic-bezier(.22,.68,.18,1) both;
+  }
+
+  @keyframes flyIn{
+    0%   { transform:translate(55vw,-50vh) rotate(20deg) scale(0.85); opacity:0; }
+    18%  { transform:translate(22vw,-32vh) rotate(-12deg) scale(0.9); opacity:1; }
+    36%  { transform:translate(-12vw,-18vh) rotate(10deg) scale(0.95); opacity:1; }
+    54%  { transform:translate(9vw,-7vh) rotate(-8deg) scale(0.98); opacity:1; }
+    72%  { transform:translate(-5vw,1vh) rotate(5deg) scale(1); opacity:1; }
+    88%  { transform:translate(2vw,9px) rotate(-2deg) scale(1); opacity:1; }
+    100% { transform:translate(0,16px) rotate(0deg) scale(1); opacity:1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .envelope{ animation:none; opacity:1; }
+  }
+
+  .envelope-back{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(160deg, var(--blue-1), var(--blue-2));
+    border-radius:6px;
+    box-shadow:0 18px 40px rgba(31,68,104,0.35);
+  }
+
+  .envelope-pocket{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:82%;
+    background:linear-gradient(180deg, var(--blue-2), var(--blue-deep));
+    border-radius:0 0 6px 6px;
+    clip-path:polygon(0 0, 50% 20%, 100% 0, 100% 100%, 0 100%);
+    z-index:2;
+  }
+
+  .pocket-line{
+    position:absolute;
+    left:10%; right:10%;
+    height:3px;
+    background:var(--white);
+    opacity:0.85;
+    border-radius:2px;
+  }
+  .pocket-line.one{ bottom:34%; }
+  .pocket-line.two{ bottom:28%; }
+
+  .envelope-label{
+    position:absolute;
+    left:6%; right:6%;
+    bottom:8%;
+    text-align:center;
+    font-family:'Poppins', sans-serif;
+    font-size:clamp(13px,2.6vw,16px);
+    color:var(--white);
+    text-shadow:0 1px 2px rgba(0,0,0,0.25);
+    z-index:4;
+  }
+
+  .envelope-letter-peek{
+    position:absolute;
+    left:10%; right:10%;
+    bottom:8%;
+    height:55%;
+    background:linear-gradient(165deg, var(--blue-1), var(--blue-2));
+    border-radius:3px;
+    box-shadow:0 -2px 8px rgba(0,0,0,0.15);
+    z-index:1;
+    transition:transform 0.7s cubic-bezier(.6,.05,.25,1) 0.5s, opacity 0.5s ease 0.9s;
+    overflow:hidden;
+  }
+
+  .peek-line{
+    position:absolute;
+    left:14%; right:14%;
+    height:2px;
+    background:var(--white);
+    opacity:0.8;
+  }
+  .peek-line.one{ top:30%; }
+  .peek-line.two{ top:38%; }
+
+  .envelope-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:62%;
+    background:linear-gradient(160deg, var(--blue-1), var(--blue-2));
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    transform-origin:top center;
+    transform:rotateX(0deg);
+    transition:transform 0.7s cubic-bezier(.6,.05,.25,1);
+    z-index:3;
+    box-shadow:0 6px 14px rgba(31,68,104,0.25);
+  }
+
+  .seal{
+    position:absolute;
+    top:40%; left:50%;
+    transform:translate(-50%,-50%) scale(1);
+    width:42px; height:42px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, #ffd6e3 70%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.25);
+    z-index:4;
+    transition:transform 0.35s ease, opacity 0.35s ease;
+  }
+
+  .envelope.cracking .seal{
+    transform:translate(-50%,-50%) scale(1.3) rotate(8deg);
+  }
+
+  .envelope.open .seal{
+    transform:translate(-50%,-50%) scale(0.4) rotate(25deg);
+    opacity:0;
+  }
+
+  .envelope.open .envelope-flap{
+    transform:rotateX(-170deg);
+  }
+
+  .envelope.open .envelope-letter-peek{
+    transform:translateY(-240%);
+    opacity:0;
+  }
+
+  .hint{
+    margin:18px 0 0;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--blue-3);
+    text-align:center;
+  }
+
+  /* ---------- letter ---------- */
+  .letter-paper{
+    position:relative;
+    width:min(92vw, calc(600px + 1cm));
+    background:linear-gradient(170deg, var(--blue-1), var(--blue-3));
+    color:var(--ink-on-blue);
+    border-radius:10px;
+    padding:clamp(54px, 9vw, 76px) clamp(30px,6vw,48px) clamp(46px,8vw,60px);
+    box-shadow:0 30px 60px rgba(31,68,104,0.35);
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  body.is-open .letter-paper{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .letter-paper::before,
+  .letter-paper::after{
+    content:"";
+    position:absolute;
+    left:clamp(20px,5vw,32px);
+    right:clamp(20px,5vw,32px);
+    height:3px;
+    background:var(--white);
+    opacity:0.85;
+    border-radius:2px;
+  }
+  .letter-paper::before{ top:22px; }
+  .letter-paper::after{ top:30px; }
+
+  .letter-heading{
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:clamp(30px, 5.6vw, 42px);
+    margin:0 0 16px;
+    color:var(--white);
+  }
+
+  .letter-body p{
+    font-family:'Poppins', sans-serif;
+    font-size:clamp(19px, 3.2vw, 23px);
+    line-height:1.55;
+    margin:0 0 14px;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .letter-body p.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .letter-body::after{
+    content:"";
+    display:block;
+    clear:both;
+  }
+
+  /* ---------- foto yang menyatu di alur teks ---------- */
+  .flow-photo{
+    background:var(--white);
+    padding:5px;
+    border-radius:5px;
+    box-shadow:0 10px 18px rgba(0,0,0,0.28);
+    aspect-ratio:1;
+  }
+
+  .flow-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    border-radius:2px;
+    background:#dde7f0;
+  }
+
+  .flow-photo.fit-contain img{
+    object-fit:contain;
+    object-position:center;
+  }
+
+  .photo-placeholder-mini{
+    width:100%;
+    height:100%;
+    border-radius:2px;
+    background:repeating-linear-gradient(45deg, #dceaf6, #dceaf6 6px, #eef6fc 6px, #eef6fc 12px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:9px;
+    color:#5b7c9c;
+    text-align:center;
+    padding:4px;
+    line-height:1.2;
+  }
+
+  .flow-photo.size-sm{ width:clamp(72px, 22vw, 100px); }
+  .flow-photo.size-md{ width:clamp(94px, 28vw, 132px); }
+  .flow-photo.size-lg{ width:clamp(150px, 46vw, 220px); }
+  .flow-photo.size-portrait{
+    width:clamp(130px, 38vw, 190px);
+    aspect-ratio:3/4;
+  }
+  .flow-photo.size-portrait img{
+    height:100%;
+  }
+
+  .flow-photo.float-left{ float:left; margin:2px 16px 12px 0; }
+  .flow-photo.float-right{ float:right; margin:2px 0 12px 16px; }
+  .flow-photo.center-block{
+    float:none;
+    clear:both;
+    display:block;
+    margin:18px auto 6px;
+  }
+
+  .flow-photo.tilt-a{ transform:rotate(-6deg); }
+  .flow-photo.tilt-b{ transform:rotate(6deg); }
+  .flow-photo.tilt-c{ transform:rotate(-3deg); }
+  .flow-photo.tilt-d{ transform:rotate(4deg); }
+</style>
+</head>
+<body>
+
+  <div class="bg-character left" id="bgLeft"></div>
+  <div class="bg-character right" id="bgRight"></div>
+
+  <main class="scene scene-envelope">
+    <div class="stage">
+      <button class="envelope" id="envelopeBtn" aria-label="Ketuk untuk membuka surat">
+        <div class="envelope-back"></div>
+        <div class="envelope-letter-peek">
+          <div class="peek-line one"></div>
+          <div class="peek-line two"></div>
+        </div>
+        <div class="envelope-pocket">
+          <div class="pocket-line one"></div>
+          <div class="pocket-line two"></div>
+        </div>
+        <div class="envelope-flap"></div>
+        <p class="envelope-label" id="envelopeLabel"></p>
+        <div class="seal">♡</div>
+      </button>
+    </div>
+    <p class="hint">teken suratnya kak</p>
+  </main>
+
+  <section class="scene scene-letter" aria-hidden="true">
+    <div class="letter-paper">
+      <div class="letter-body" id="letterBody"></div>
+    </div>
+  </section>
+
+  <audio id="bgm" loop></audio>
+
+<script>
+  /* ====================== EDIT DI SINI ====================== */
+  const CONFIG = {
+    recipientName: "Archi",
+    senderLabel: "Dari adek kak archii💖",
+    message: [
+      "Haloo kak archii aku kirim ni surat karna ada 2 hal yaitu minta maaf dan klarifikasi kwkwkwkw",
+      "Aku minta maaf karna manggil kamu jester bukan kak archi kek biasa",
+      "Dan aku mau klarifikasi semua yg aku lakuin yg marah lah ngatain itu sebenarnya cuma \"acting\" iya acting aku cuma mau uji katanya aku udah di anggap kek adek kandung yaudah dari dulu aku nyari waktu yg pas hehehehe jadi maafin yah",
+      "Btw selamat kak dapat juara delapan aku bangga banget kak,jadi mau maafin dan masih anggep aku adek mu?"
+    ],
+    photos: [
+      "data:image/jpeg;base64,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
